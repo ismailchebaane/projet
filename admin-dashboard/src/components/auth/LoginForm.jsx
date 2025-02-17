@@ -48,9 +48,10 @@ const LoginForm = () => {
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit}>
-          <label className="block mb-2 text-blue-900">Admin name</label>
+          <label className="block mb-2 text-blue-900">Admin's username</label>
           <input
             type="text"
+            placeholder="Enter your username"
             value={adminName}
             onChange={(e) => setAdminName(e.target.value)}
             required
@@ -60,6 +61,7 @@ const LoginForm = () => {
           <label className="block mb-2 text-blue-900">Password</label>
           <input
             type="password"
+            placeholder="***********  "
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

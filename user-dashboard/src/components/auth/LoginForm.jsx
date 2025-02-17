@@ -17,8 +17,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-white">
-      <div className="bg-blue-900 p-8 rounded-lg shadow-lg text-white w-96">
+    <div>
+
+
+    <div className="flex justify-center items-center h-screen ">
+
+      <div className="bg-bluecustom p-8 rounded-lg shadow-lg text-white w-96">
         <h2 className="text-2xl font-bold text-center mb-4">Who are you?</h2>
         <form onSubmit={handleLogin}>
           <label className="block mb-2">User Name</label>
@@ -27,16 +31,16 @@ const LoginPage = () => {
             placeholder="Enter User Name"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mb-4 text-black rounded"
+            className="w-full bg-bluecustom border border-white text-white p-2 mb-4 rounded"
           />
 
-          <label className="block mb-2">Password/ matricule</label>
+          <label className="block mb-2">Password/ Matricule</label>
           <input
             type="password"
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mb-4 text-black rounded"
+            className="w-full bg-bluecustom p-2 mb-4 border border-white text-white rounded"
           />
 
           {error && (
@@ -45,8 +49,8 @@ const LoginPage = () => {
             </p>
           )}
 
-          <button className="w-full bg-green-600 py-2 text-white font-bold rounded hover:bg-green-700">
-            login
+          <button className="w-full py-2 transition-all text-white font-bold rounded bg-blue-900 hover:bg-blue-700">
+            Login
           </button>
         </form>
 
@@ -61,6 +65,8 @@ const LoginPage = () => {
           </a>
         </p>
       </div>
+    </div>
+
     </div>
   );
 };
