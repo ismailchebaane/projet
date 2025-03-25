@@ -18,12 +18,12 @@ function App() {
         <Navbar />
       <Routes>
         <Route path="/" element={<FirstPage />} />
-        <Route path="/second" element={<SecondPage />} />
-        <Route path="/read-only" element={<ReadOnlyPage />} />
-   {/*  <Route path="/read-write" element={<PrivateRoute><ReadWritePage /></PrivateRoute>} />  */}
-    <Route path="/read-write" element={<ReadWritePage />} /> 
+        <Route path="/second/:id" element={<SecondPage />} />
+        <Route path="/read-only/:id" element={<ReadOnlyPage />} />
+   {  <Route path="/read-write/:id" element={<PrivateRoute><ReadWritePage /></PrivateRoute>} /> }
+  
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/signup" element={<SignupForm />} />
+      
         {/* Catch-all 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>

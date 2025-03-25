@@ -7,7 +7,7 @@ const SignUpPage = () => {
   const [work, setWork] = useState("Productor");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [error, setError] = useState("");
-  const [users, setUsers] = useState(["FouFou"]); // Simulated existing users
+  const [users, setUsers] = useState(["FouFou"]);
 
   const workOptions = ["Productor", "QM", "PPE", "IM"];
 
