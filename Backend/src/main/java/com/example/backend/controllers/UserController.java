@@ -33,8 +33,11 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/api/user/{userName}")
     public Optional<User> getUser(@PathVariable("userName") String userName) {
+
         return userServices.getUser(userName);
     }
+
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/add/user")
     public ResponseEntity<?> addUser(@Valid @RequestBody User user, BindingResult result) {
@@ -55,20 +58,23 @@ public class UserController {
         userServices.deleteUser(userName);
     }
 
-    
-    
+
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping(path = "/update/user/{userName}")
     public ResponseEntity<?> updateUser(
             @PathVariable("userName") String userName,
-            @RequestParam(required = false) String fullName,
-            @RequestParam(required = false) String username,
-            @RequestParam(required = false) String matricule,
-            @RequestParam(required = false) Work work,
-            @RequestParam(required = false) Role role) {  // Changed from Boolean admin to Role role
-
+            @RequestBody User updateDTO) {
+    System.out.print(updateDTO);
         try {
-            userServices.updateUser(userName, fullName, username, matricule, work, role);  // Pass the role
+            userServices.updateUser(
+                    userName,
+                    updateDTO.getFullName(),
+                    updateDTO.getUsername(),
+                    updateDTO.getMatricule(),
+                    updateDTO.getWork(),
+                    updateDTO.getRole()
+            );
             return ResponseEntity.ok("User updated successfully");
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

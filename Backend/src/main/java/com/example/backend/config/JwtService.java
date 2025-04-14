@@ -3,6 +3,8 @@ package com.example.backend.config;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -12,8 +14,10 @@ import io.jsonwebtoken.Jwts;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -22,9 +26,13 @@ public class JwtService {
 
 
         public String GenerateToken(UserDetails userDetails){
-            return GenerateToken(new HashMap<>(),userDetails);
-
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("roles", userDetails.getAuthorities().stream()
+                                          .map(GrantedAuthority::getAuthority)
+                                          .collect(Collectors.toList()));
+            return GenerateToken(claims, userDetails);
         }
+
 
         public String GenerateToken(Map<String,Object> extraCLaims, UserDetails userDetails){
         return Jwts
@@ -70,6 +78,12 @@ public class JwtService {
     private boolean isTokenExpired(String token) {
             return extractExpiration(token).before(new Date());
     }
+    
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
+    }
+
 
     private Date extractExpiration(String token) {
             return extractClaim(token,Claims::getExpiration);

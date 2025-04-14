@@ -5,6 +5,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class DocumentsController {
     @Autowired
     private DocumentService documentService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
@@ -26,6 +28,7 @@ public class DocumentsController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getFile(@PathVariable String id) {
         Resource file = documentService.getFile(id);
@@ -35,9 +38,11 @@ public class DocumentsController {
                 .body(file);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteFile(@PathVariable String id) {
-        documentService.deleteFile(id);
+
+        documentService.deleteFileAndRemoveFromEquipment(id);
         return ResponseEntity.ok("File deleted successfully.");
     }
 }

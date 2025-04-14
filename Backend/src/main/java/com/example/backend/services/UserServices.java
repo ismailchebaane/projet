@@ -38,9 +38,11 @@ public class UserServices {
     
     // delete 
     public void deleteUser(String userName) {
+
         User user = userRepository.findByUsername(userName)
                 .orElseThrow(() -> new IllegalStateException("User does not exist"));
         userRepository.delete(user);
+
     }
 
     
