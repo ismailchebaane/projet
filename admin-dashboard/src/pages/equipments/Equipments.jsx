@@ -51,7 +51,7 @@ const Equipments = () => {
     }
   };
   
-  
+
 
 
   if (loading) return <div className="text-center py-10 text-gray-600">Loading...</div>;
@@ -116,8 +116,8 @@ const Equipments = () => {
                     <span className="text-green-700 font-medium">{equipment.state}</span>
                   </td>
                   <td className="py-3 px-4">
-                  {equipment.description?.length > 100
-                       ? equipment.description.substring(0, 100) + '...'
+                  {equipment.description?.length > 20
+                       ? equipment.description.substring(0, 20) + '...'
                        : equipment.description}
                    </td>
                   <td className="py-3 px-4">{equipment.type}</td>

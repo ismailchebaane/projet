@@ -8,9 +8,8 @@ import { AuthContext } from "../src/Components/AuthContext/AuthContext";
 import Equipments from './pages/equipments/Equipments';
 import Settings from './pages/Settings/Settings';
 import EquipmentDetails from './pages/EquipmentDetails/EquipmentDetails';
-import DeletePost from './Components/DeletePost/DeletePost';
 import Allusers from './pages/Users/AllUsers';
-
+import Adduser from './pages/Users/AddUser';
 import Register from "./pages/Register/Register"
 import Login from "./pages/Login/Login"
 import Logout from "./pages/Logout/Logout"
@@ -31,13 +30,14 @@ function App() {
         <Route path="/register" element={!user ? <Register /> : <Dashboard />} />
         <Route path="/login" element={!user ? <Login /> : <Dashboard />} />
         <Route  path="/logout" element={   <Logout />} />
-        <Route path='/place/delete/:id' element={<DeletePost />} />
+       
         <Route path="/equipments/:id" element={!user ?<Login/>:<EquipmentDetails />} />
  
         <Route path="/settings" element={!user ?<Login/>:<Settings />} />
         <Route path="/equipments" element={!user ?<Login/>:<Equipments />} />
         <Route path="/form" element={!user ?<Login/>:<Form />} />
-        <Route path="/allusers" element={!user ?<Login/>:<Allusers />} />
+        <Route path="/users" element={!user ?<Login/>:<Allusers />} />
+        <Route path="/adduser" element={!user ?<Login/>:<Adduser />} />
       </Routes>
     </Router>
     </>

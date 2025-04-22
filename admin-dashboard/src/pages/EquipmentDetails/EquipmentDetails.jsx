@@ -101,9 +101,13 @@ const EquipmentDetails = () => {
             <DetailRow label="Process" value={equipment.process} />
             <div className="py-4">
               <div className="text-gray-600 font-semibold">Description</div>
-              <div className="mt-2 border border-gray-300 rounded-xl p-2 space-y-2">
-                {equipment.description}
-              </div>
+              <div className="mt-4 border border-gray-300 rounded-2xl p-4 bg-gray-50 shadow-sm">
+  <h4 className="text-sm font-semibold text-gray-500 mb-2">Description</h4>
+  <p className="text-gray-700 leading-relaxed whitespace-pre-line break-words overflow-hidden">
+    {equipment.description}
+  </p>
+</div>
+
             </div>
 
             <div className="py-4">

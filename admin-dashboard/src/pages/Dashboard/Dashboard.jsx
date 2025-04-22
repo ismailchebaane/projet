@@ -1,251 +1,227 @@
-import React from 'react'
-import {useState, useEffect} from 'react'
-import {Link} from "react-router-dom"
-import axios from 'axios';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import PeopleIcon from '@mui/icons-material/People';
-import ArticleIcon from '@mui/icons-material/Article';
-import ReviewsIcon from '@mui/icons-material/Reviews';
-export default function Dashboard() {
-    const [toggleMenu, setToggleMenu] = useState(false)
-    const [toggleSetting, setToggleSetting] = useState(false)
-    const [Users, setUsers] = useState([])
-    const [allUsers, setallUsers] = useState([])
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  PieChart, Pie, Cell, Tooltip,
+  BarChart, Bar, XAxis, YAxis, Legend,
+  LineChart, Line, ResponsiveContainer,
+} from "recharts";
+import { FaCogs, FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im"; // Spinner icon
 
-    const [Posts, setPosts] = useState([])
-    const [allPosts, setallPosts] = useState([])
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
-    const [Reviews, setReviews] = useState([])
-    const [allReviews, setallReviews] = useState([])
-    const [sortedReviewsData, setSortedReviewsData] = useState([]);
+const ICONS = {
+  "Added Equipment": <FaCogs className="text-blue-500 text-2xl" />,
+  "Added Documents": <FaFileAlt className="text-green-500 text-2xl" />,
+  "Approved Equipment": <FaCheckCircle className="text-purple-500 text-2xl" />,
+  "Pending Equipment": <FaClock className="text-yellow-500 text-2xl" />,
+};
 
+const SummaryCard = ({ title, value = 0, change = "0" }) => (
+  <div className="bg-white p-4 rounded-2xl shadow flex items-center justify-between">
+    <div className="flex items-start gap-2">
+      {ICONS[title]}
+      <div>
+        <p className="text-xs text-gray-500">{title}</p>
+        <p className="text-lg font-bold">{value}</p>
+      </div>
+    </div>
+    <div className="flex flex-col items-center">
+      <div className="w-10 h-10 relative">
+        <svg className="absolute top-0 left-0" viewBox="0 0 36 36">
+          <path
+            d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none"
+            stroke="#4CAF50"
+            strokeWidth="2"
+            strokeDasharray={`${Math.abs(parseInt(change))}, 100`}
+          />
+        </svg>
+      </div>
+      <span className={`text-sm font-semibold ${change?.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>{change ?? '0'}</span>
+    </div>
+  </div>
+);
 
-    useEffect(() => {
-        axios.get(`http://localhost:4000/api/users/`).then((response) => {
-            setUsers(response.data.length);
-            setallUsers(response.data)
-        }).catch((error) => {
-            console.log(error);
-        });
-    }, []);
-    useEffect(() => {
-        axios.get(`http://localhost:4000/api/places/`).then((response) => {
-            setPosts(response.data.length);
-            setallPosts(response.data)
+const ChartCard = ({ title, children, className = "" }) => (
+  <div className={`bg-white p-4 rounded-2xl shadow ${className}`}>
+    <h2 className="text-sm font-semibold mb-2 text-gray-700">{title}</h2>
+    <div className="w-full h-64">{children}</div>
+  </div>
+);
 
+const Dashboard = () => {
+  const [summary, setSummary] = useState({});
+  const [pieData, setPieData] = useState([]);
+  const [barData, setBarData] = useState([]);
+  const [lineData, setLineData] = useState([]);
+  const [goodMachines, setGoodMachines] = useState({ good: 0, total: 0 });
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true); // 🔹 Loading state
+const token=localStorage.getItem("token")
+  const config=[ {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }]
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          summaryRes,
+          pieRes,
+          barRes,
+          lineRes,
+          goodRes,
+          activityRes,
+        ] = await Promise.all([
+          axios.get("http://localhost:8080/api/dashboard/summary",config),
+          axios.get("http://localhost:8080/api/dashboard/pie",config),
+          axios.get("http://localhost:8080/api/dashboard/bar",config),
+          axios.get("http://localhost:8080/api/dashboard/line",config),
+          axios.get("http://localhost:8080/api/dashboard/good-machines",config),
+          axios.get("http://localhost:8080/api/dashboard/recent-activity",config),
+        ]);
 
-      
-        }).catch((error) => {
-            console.log(error);
-        });
-    }, []);
-    useEffect(() => {
-        axios.get(`http://localhost:4000/api/reviews/`).then((response) => {
-            setReviews(response.data.length);
-            setallReviews(response.data)
+        setSummary(summaryRes.data);
+        setPieData(pieRes.data);
+        setBarData(barRes.data);
+        setLineData(lineRes.data);
+        setGoodMachines(goodRes.data);
+        setRecentActivity(activityRes.data);
+      } catch (error) {
+        console.error("Dashboard loading failed:", error);
+      } finally {
+        setLoading(false); // ✅ Done loading
+      }
+    };
 
+    fetchData();
+  }, []);
 
-        }).catch((error) => {
-            console.log(error);
-        });
-    }, []);
+  const summaryCards = [
+    { title: "Added Equipment", value: summary.addedEquipment, change: summary.addedEquipmentChange },
+    { title: "Added Documents", value: summary.addedDocuments, change: summary.addedDocumentsChange },
+    { title: "Approved Equipment", value: summary.approvedEquipment, change: summary.approvedEquipmentChange },
+    { title: "Pending Equipment", value: summary.pendingEquipment, change: summary.pendingEquipmentChange },
+  ];
 
-
-    const lastFive = allUsers.slice(-5)
-
-    const lastFivep = allPosts.slice(-5);
-
-    let lastFiver = allReviews.slice(-5)
-
-
-    const MostReviewed = allPosts.sort((a, b) => b.REVIEWS.length - a.REVIEWS.length);
-    console.log(MostReviewed)
-
-    const fivemostreviewed = MostReviewed.slice(0, 5);
-
-
+  if (loading) {
     return (
-        <div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <ImSpinner2 className="animate-spin text-5xl text-blue-500" />
+        <span className="ml-4 text-gray-600 text-xl font-medium">Loading dashboard...</span>
+      </div>
+    );
+  }
 
+  return (
+    <div className="p-6 mt-16 bg-gray-100 min-h-screen">
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        {summaryCards.map((card) => (
+          <SummaryCard key={card.title} {...card} />
+        ))}
+      </div>
 
-            <div class="p-4 ">
-                <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg  mt-14">
-                    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div class="statistic-card bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div class="statistic-header flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="statistic-title text-lg font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Number of Users</h3>
-                                <div class="statistic-icon bg-green-100 text-green-600 rounded-full p-2">
-                                    <PeopleIcon/>
-                                </div>
-                            </div>
-                            <div class="statistic-body text-center px-6 py-4">
-                                <p class="statistic-count text-4xl font-bold text-gray-700 dark:text-gray-300">
-                                    {Users}</p>
-                            </div>
-                        </div>
+      {/* Pie + Line */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <ChartCard title="Equipment by Type">
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                innerRadius={40}
+                label
+                labelLine={false}
+              >
+                {pieData.map((_, idx) => (
+                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
+        <ChartCard title="Plants and Process">
+          <ResponsiveContainer>
+            <LineChart data={lineData}>
+              <XAxis dataKey="process" style={{ fontSize: '10px' }} />
+              <YAxis style={{ fontSize: '10px' }} />
+              <Tooltip />
+              <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
 
-                        <div class="statistic-card bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div class="statistic-header flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="statistic-title text-lg font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Number of Posts</h3>
-                                <div class="statistic-icon bg-purple-100 text-purple-600 rounded-full p-2">
-                                    <ArticleIcon/>
-                                </div>
-                            </div>
-                            <div class="statistic-body text-center px-6 py-4">
-                                <p class="statistic-count text-4xl font-bold text-gray-700 dark:text-gray-300">
-                                    {Posts}</p>
-                            </div>
-                        </div>
-                        <div class="statistic-card bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div class="statistic-header flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="statistic-title text-lg font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Number of Reviews</h3>
-                                <div class="statistic-icon bg-purple-100 text-purple-600 rounded-full p-2">
-                                    <ReviewsIcon/>
+      {/* Bar + Donut + Activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <ChartCard title="Equipment Count by Process and Plant" className="xl:col-span-2">
+          <ResponsiveContainer>
+            <BarChart data={barData}>
+              <XAxis dataKey="process" style={{ fontSize: '10px' }} />
+              <YAxis style={{ fontSize: '10px' }} />
+              <Tooltip />
+              <Legend verticalAlign="top" height={36} />
+              {Object.keys(barData[0] || {})
+                .filter((key) => key !== "process")
+                .map((plant, idx) => (
+                  <Bar key={plant} dataKey={plant} stackId="a" fill={COLORS[idx % COLORS.length]} />
+                ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
-                                </div>
-                            </div>
-                            <div class="statistic-body text-center px-6 py-4">
-                                <p class="statistic-count text-4xl font-bold text-gray-700 dark:text-gray-300">
-                                    {Reviews}</p>
-                            </div>
-                        </div>
-                    </section>
+        <ChartCard title="Machines in Good Condition">
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: "Good", value: goodMachines.good },
+                  { name: "Others", value: goodMachines.total - goodMachines.good },
+                ]}
+                innerRadius={50}
+                outerRadius={70}
+                dataKey="value"
+                label
+                labelLine={false}
+              >
+                <Cell fill="#82ca9d" />
+                <Cell fill="#f4f4f4" />
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
 
+      {/* Activity Section */}
+      <div className="mt-6 bg-white p-4 rounded-2xl shadow">
+        <h2 className="text-sm font-semibold mb-4 text-gray-700">Recent Activities</h2>
+        <ul className="space-y-3">
+          {recentActivity.map((act, idx) => (
+            <li key={idx} className="border-b pb-2">
+              <p className="text-sm font-semibold text-blue-600">{act.code}</p>
+              <p className="text-xs">{act.machine}</p>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{act.date}</span>
+                <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{act.plant}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
-                    <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg  mt-14">
-                        <p className="text-2xl font-bold text-center mb-2 text-gray-400 dark:text-gray-500">Recent Users</p>
-                        <div className="w-full overflow-x-scroll">
-                            <table className="table-auto w-full">
-                                <thead>
-                                    <tr className="bg-gray-200 text-gray-700 uppercase text-sm font-medium">
-                                        <th className="py-4 px-4 sm:px-6 lg:px-8 text-left">Username</th>
-                                        <th className="py-4 px-4 sm:px-6 lg:px-8 text-left">Email</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-gray-800 text-sm font-medium">
-                                    {
-                                    lastFive.map((item, index) => (
-                                        <tr key={
-                                                item.username
-                                            }
-                                            className={
-                                                `${
-                                                    index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                                                } hover:bg-gray-200 transition-colors duration-200`
-                                        }>
-                                            <td className="py-4 px-4 sm:px-6 lg:px-8 text-left">
-                                                {
-                                                item.username
-                                            }</td>
-                                            <td className="py-4 px-4 sm:px-6 lg:px-8 text-left">
-                                                {
-                                                item.email
-                                            }</td>
-                                        </tr>
-                                    ))
-                                } </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 overflow-x-auto">
-                        <p className="text-2xl font-bold mb-2 text-gray-400 text-center dark:text-gray-500">Recent Posts</p>
-                        <table className="min-w-max w-full table-auto">
-                            <thead>
-                                <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                                    <th className="py-3 px-6 text-left">Title</th>
-                                    <th className="py-3 px-6 text-left">Category</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-gray-600 text-sm font-light">
-                                {
-                                lastFivep.map((item) => (
-                                    <tr key={
-                                            item.title
-                                        }
-                                        className="bg-white hover:bg-gray-100 transition-colors duration-200">
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.title
-                                        }</td>
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.category
-                                        }</td>
-                                    </tr>
-                                ))
-                            } </tbody>
-                        </table>
-                    </div>
-
-
-                    <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 overflow-x-auto">
-                        <p className="text-2xl font-bold mb-2 text-gray-400 text-center dark:text-gray-500">Recent Reviews</p>
-                        <table className="min-w-max w-full table-auto">
-                            <thead>
-                                <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                                    <th className="py-3 px-6 text-left">Username</th>
-                                    <th className="py-3 px-6 text-left">Comment</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-gray-600 text-sm font-light">
-                                {
-                                lastFiver.map((item) => (
-                                    <tr key={
-                                            item.title
-                                        }
-                                        className="bg-white hover:bg-gray-100 transition-colors duration-200">
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.username
-                                        }</td>
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.comments
-                                        }</td>
-                                    </tr>
-                                ))
-                            } </tbody>
-                        </table>
-                    </div>
-
-                    <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14 overflow-x-auto">
-                        <p className="text-2xl font-bold mb-2 text-gray-400 text-center dark:text-gray-500">Most Reviewd</p>
-                        <table className="min-w-max w-full table-auto">
-                            <thead>
-                                <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                                    <th className="py-3 px-6 text-left">Title</th>
-                                    <th className="py-3 px-6 text-left">Reviews</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-gray-600 text-sm font-light">
-                                {
-                                fivemostreviewed.map((item) => (
-                                    <tr key={
-                                            item.title
-                                        }
-                                        className="bg-white hover:bg-gray-100 transition-colors duration-200">
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.title
-                                        }</td>
-                                        <td className="py-3 px-6 text-left whitespace-nowrap">
-                                            {
-                                            item.REVIEWS.length
-                                        }</td>
-                                    </tr>
-                                ))
-                            } </tbody>
-                        </table>
-                    </div>
-
-
-                    
-                </div>
-            </div>
-        </div>
-    )
-}
+export default Dashboard;

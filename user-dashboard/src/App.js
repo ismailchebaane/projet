@@ -11,10 +11,11 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import NotFound from "./components/common/NotFound";
-
+import { ToastContainer, toast } from 'react-toastify';
 function App() {
   return (
     <Router>
+       <ToastContainer />
         <Navbar />
       <Routes>
         <Route path="/" element={<FirstPage />} />

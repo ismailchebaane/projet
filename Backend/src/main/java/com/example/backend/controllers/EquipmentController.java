@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.Equipment.*;
-import java.util.List;
+
+import java.util.*;
+
 import com.example.backend.services.*;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/equipment")
@@ -25,6 +26,9 @@ import java.util.Optional;
 public class EquipmentController {
 	@Autowired
     private final EquipmentServices equipmentService;
+
+
+    private final EquipmentRepository equipmentRepository;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/add")
@@ -54,7 +58,7 @@ public class EquipmentController {
     /**
      * Get equipment by ID.
      */
-    @PreAuthorize("hasAuthority('ADMIN')")
+
     @GetMapping("/{id}")
     public ResponseEntity<Equipment> getEquipmentById(@PathVariable String id) {
         Optional<Equipment> equipment = equipmentService.getEquipmentById(id);
@@ -142,6 +146,10 @@ public class EquipmentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-    
+    @GetMapping("/check/{serialNumber}")
+    public ResponseEntity<Map<String, Boolean>> checkSerialNumberExists(@PathVariable String serialNumber) {
+        boolean exists = equipmentRepository.findBySerialNumber(serialNumber).isPresent();
+        return ResponseEntity.ok(Collections.singletonMap("exists", exists));
+    }
     
 }

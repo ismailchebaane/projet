@@ -127,16 +127,18 @@ export default function Navbar() {
                     <span className="flex-1 ml-3 whitespace-nowrap">Equipments</span>
                   </Link>
                 </li>
+             
                 <li>
-                  <Link to="/review" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100">
-                    <RateReviewIcon />
-                    <span className="flex-1 ml-3 whitespace-nowrap">Reviews</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/allusers" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100">
+                  <Link to="/users" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100">
                     <GroupIcon />
                     <span className="flex-1 ml-3 whitespace-nowrap">Users</span>
+                  </Link>
+                </li>
+                
+                <li>
+                  <Link to="/adduser" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100">
+                    <GroupIcon />
+                    <span className="flex-1 ml-3 whitespace-nowrap">Add User</span>
                   </Link>
                 </li>
               </ul>

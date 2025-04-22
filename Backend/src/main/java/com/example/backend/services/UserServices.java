@@ -1,6 +1,7 @@
 package com.example.backend.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -13,8 +14,13 @@ import com.example.backend.repository.*;
 public class UserServices {
     @Autowired
     private UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    
+    @Autowired
+    public UserServices(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
     //get all user
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -32,9 +38,12 @@ public class UserServices {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new IllegalStateException("User already exists");
         }
+
+        // Encrypt matricule
+        user.setMatricule(passwordEncoder.encode(user.getMatricule()));
+
         userRepository.save(user);
     }
-
     
     // delete 
     public void deleteUser(String userName) {
@@ -75,7 +84,8 @@ public class UserServices {
                     .filter(existingUser -> !existingUser.getId().equals(user.getId()))
                     .ifPresent(existingUser -> { throw new IllegalStateException("Matricule already exists"); });
 
-            user.setMatricule(matricule);
+            user.setMatricule(passwordEncoder.encode(matricule));
+
         }
 
         // Update Work
