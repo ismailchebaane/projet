@@ -59,7 +59,7 @@ const DocumentList = () => {
           Return
         </button>
 
-        <h2 className="text-2xl font-bold mt-2">Read Only</h2>
+        <h2 className="text-2xl font-bold mt-2">Browse Document :</h2>
         <hr className="border-gray-300 my-2" />
 
         <div className="mt-4 space-y-1">

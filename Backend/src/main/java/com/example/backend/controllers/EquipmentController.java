@@ -1,6 +1,10 @@
 package com.example.backend.controllers;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.Equipment.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.example.backend.services.*;
@@ -19,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/equipment")
@@ -27,6 +33,10 @@ public class EquipmentController {
 	@Autowired
     private final EquipmentServices equipmentService;
 
+
+
+    @Autowired
+    private GridFsTemplate gridFsTemplate;
 
     private final EquipmentRepository equipmentRepository;
 
@@ -48,6 +58,8 @@ public class EquipmentController {
 
         return ResponseEntity.ok(equipment);
     }
+
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<List<Equipment>> getAllEquipment() {
@@ -151,5 +163,69 @@ public class EquipmentController {
         boolean exists = equipmentRepository.findBySerialNumber(serialNumber).isPresent();
         return ResponseEntity.ok(Collections.singletonMap("exists", exists));
     }
-    
+
+
+    @PostMapping("/{equipmentId}/replace-document/{docId}")
+    public ResponseEntity<?> replaceDocument(
+            @PathVariable String equipmentId,
+            @PathVariable String docId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("oldDocName") String oldDocName) {
+
+        try {
+            // 1. Get Equipment
+            Optional<Equipment> optionalEquipment = equipmentRepository.findBySerialNumber(equipmentId);
+            if (optionalEquipment.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipment not found");
+            }
+            Equipment equipment = optionalEquipment.get();
+
+            // 2. Find old document
+            DocumentEntity oldDoc = equipment.getDocuments().stream()
+                    .filter(doc -> doc.getId().equals(docId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (oldDoc == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document not found in equipment");
+            }
+
+            // 3. Move old document to archive
+            if (equipment.getArchive() == null) {
+                equipment.setArchive(new ArrayList<>());
+            }
+            equipment.getArchive().add(oldDoc);
+
+            // 4. Delete file from GridFS by ID
+            gridFsTemplate.delete(new Query(Criteria.where("_id").is(docId)));
+
+            // 5. Save new file to GridFS
+            ObjectId newFileId = gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType());
+
+            DocumentEntity newDoc = new DocumentEntity();
+            newDoc.setId(newFileId.toString());
+            newDoc.setName(file.getOriginalFilename());
+            newDoc.setFilePath("/files/" + newFileId.toString());
+            newDoc.setUploadDate(LocalDateTime.now());
+
+            // 6. Replace the old doc in the documents list
+            List<DocumentEntity> updatedDocs = equipment.getDocuments().stream()
+                    .map(d -> d.getId().equals(docId) ? newDoc : d)
+                    .collect(Collectors.toList());
+
+            equipment.setDocuments(updatedDocs);
+
+            // 7. Save updated equipment
+            Equipment saved = equipmentRepository.save(equipment);
+
+            return ResponseEntity.ok(saved);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error replacing document: " + e.getMessage());
+        }
+    }
+
+
 }

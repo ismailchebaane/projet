@@ -217,9 +217,9 @@ export default function Allusers() {
             <div className="p-4 flex justify-end">
               <button
                 onClick={() => navigate('/adduser')}
-                className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-md"
+                className="border border-gray-400 px-4 py-1 rounded text-gray-700 hover:bg-gray-100 shadow-md"
               >
-                Add User
+                Add
               </button>
             </div>
             <table className="w-full text-sm text-left text-gray-500">

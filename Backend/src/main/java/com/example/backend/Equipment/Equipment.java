@@ -24,10 +24,11 @@ public class Equipment {
     private String description;
     private String type;
     private List<DocumentEntity> documents;
+    private List<DocumentEntity> archive;
 
     // Constructor without 'id' as MongoDB generates it
-    public Equipment(String name, String serialNumber, String immobilizationNumber, 
-                     PlantType plant, ProcessType process, EquipmentState state, 
+    public Equipment(String name, String serialNumber, String immobilizationNumber,
+                     PlantType plant, ProcessType process, EquipmentState state,
                      String description, String type, List<DocumentEntity> documents) {
         this.name = name;
         this.serialNumber = serialNumber;
@@ -38,5 +39,21 @@ public class Equipment {
         this.description = description;
         this.type = type;
         this.documents = documents;
+
+    }
+    // Constructor without 'id' as MongoDB generates it
+    public Equipment(String name, String serialNumber, String immobilizationNumber, 
+                     PlantType plant, ProcessType process, EquipmentState state, 
+                     String description, String type, List<DocumentEntity> documents,  List<DocumentEntity> archive) {
+        this.name = name;
+        this.serialNumber = serialNumber;
+        this.immobilizationNumber = immobilizationNumber;
+        this.plant = plant;
+        this.process = process;
+        this.state = state;
+        this.description = description;
+        this.type = type;
+        this.documents = documents;
+        this.archive=archive;
     }
 }

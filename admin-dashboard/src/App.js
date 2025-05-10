@@ -15,6 +15,7 @@ import Login from "./pages/Login/Login"
 import Logout from "./pages/Logout/Logout"
 import { Toaster } from 'react-hot-toast';
 
+
 function App() {
   const {user} = React.useContext(AuthContext);
  
@@ -26,10 +27,10 @@ function App() {
       <Navbar />
       <Routes>
         <Route exact path="/" element={!user ?<Login /> :<Dashboard/>} />
-        <Route path="/form" element={<Form />} />
+        <Route path="/form" element={!user ?<Login /> :<Form />} />
         <Route path="/register" element={!user ? <Register /> : <Dashboard />} />
         <Route path="/login" element={!user ? <Login /> : <Dashboard />} />
-        <Route  path="/logout" element={   <Logout />} />
+        <Route  path="/logout" element={  <Logout />} />
        
         <Route path="/equipments/:id" element={!user ?<Login/>:<EquipmentDetails />} />
  

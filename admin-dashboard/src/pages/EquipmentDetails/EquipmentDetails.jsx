@@ -111,13 +111,40 @@ const EquipmentDetails = () => {
             </div>
 
             <div className="py-4">
-              <div className="text-gray-600 font-semibold">Read/write docs</div>
-              <div className="mt-2 border border-gray-300 rounded-xl w-fit p-2 space-y-2">
-                {equipment.documents?.map((doc, index) => (
-                  <DocLink key={index} name={doc.name} url={doc.filePath} />
-                ))}
-              </div>
-            </div>
+  <div className="text-gray-600 font-semibold mb-1">Read/write docs</div>
+  <div className="mb-4 border border-gray-300 rounded-xl w-fit p-2 space-y-2">
+    {equipment.documents?.length > 0 ? (
+      equipment.documents.map((doc, index) => (
+        <DocLink
+          key={index}
+          name={doc.name}
+          url={`http://localhost:8080/api/documents/download/${doc.name}`}
+          uploadDate={doc.uploadDate}
+        />
+      ))
+    ) : (
+      <div className="text-sm text-gray-500">No documents available.</div>
+    )}
+  </div>
+
+  <div className="text-gray-600 font-semibold mb-1">Archived docs</div>
+  <div className="border border-gray-300 rounded-xl w-fit p-2 space-y-2">
+    {equipment.archive?.length > 0 ? (
+      equipment.archive.map((doc, index) => (
+        <DocLink
+          key={index}
+          name={doc.name}
+          url={`http://localhost:8080/api/documents/download/${doc.name}`}
+          uploadDate={doc.uploadDate}
+        />
+      ))
+    ) : (
+      <div className="text-sm text-gray-500">No archived documents.</div>
+    )}
+  </div>
+</div>
+
+
           </div>
         )}
       </div>
@@ -132,16 +159,27 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
-const DocLink = ({ name, url }) => (
-  <a
-    href={url || "#"}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center space-x-2 hover:underline cursor-pointer"
-  >
-    <Paperclip className="w-4 h-4 text-gray-600" />
-    <span>{name}</span>
-  </a>
-);
+const DocLink = ({ name, url, uploadDate }) => {
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Unknown date";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+  };
+
+  return (
+    <a
+      href={url || "#"}
+      download
+      rel="noopener noreferrer"
+      className="block hover:bg-gray-50 p-2 rounded-lg border border-gray-200"
+    >
+      <div className="flex flex-col">
+        <span className="text-blue-700 font-medium">{name}</span>
+        <span className="text-sm text-gray-500">Uploaded: {formatDate(uploadDate)}</span>
+      </div>
+    </a>
+  );
+};
+
 
 export default EquipmentDetails;

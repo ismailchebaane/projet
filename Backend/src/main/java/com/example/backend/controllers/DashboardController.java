@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.Equipment.Equipment;
 import com.example.backend.Equipment.EquipmentState;
+import com.example.backend.Equipment.PlantType;
 import com.example.backend.Equipment.ProcessType;
 import com.example.backend.repository.EquipmentRepository;
 import com.example.backend.repository.UserRepository;
@@ -59,11 +60,12 @@ public class DashboardController {
     public ResponseEntity<List<Map<String, Object>>> getEquipmentByType() {
         List<Equipment> all = equipmentRepository.findAll();
         Map<String, Long> grouped = all.stream()
-                .collect(Collectors.groupingBy(Equipment::getType, Collectors.counting()));
+                .collect(Collectors.groupingBy(e -> e.getProcess().name(), Collectors.counting()));
+        // You can use e.getProcess().toString() if you have overridden toString() in your enum for a more user-friendly name
 
         List<Map<String, Object>> response = grouped.entrySet().stream().map(entry -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("name", entry.getKey());
+            map.put("name", entry.getKey());  // This will be the string name of the enum
             map.put("value", entry.getValue());
             return map;
         }).collect(Collectors.toList());
@@ -73,27 +75,38 @@ public class DashboardController {
 
 
     @GetMapping("/bar")
-    public ResponseEntity<List<Map<String, Object>>> getEquipmentByProcessAndPlant() {
+    public ResponseEntity<List<Map<String, Object>>> getProcessCountsPerPlantRadar() {
         List<Equipment> all = equipmentRepository.findAll();
+
+        // Step 1: Group by process -> then by plant
         Map<String, Map<String, Long>> matrix = new HashMap<>();
 
         for (Equipment eq : all) {
-            String process = eq.getProcess().name();
-            String plant = eq.getPlant().name();
+            String process = eq.getProcess().name(); // enum to string
+            String plant = eq.getPlant().name();     // enum to string
+
             matrix.computeIfAbsent(process, k -> new HashMap<>());
             matrix.get(process).merge(plant, 1L, Long::sum);
         }
 
+        // Step 2: Build radar-compatible response (1 row = 1 process)
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map.Entry<String, Map<String, Long>> entry : matrix.entrySet()) {
             Map<String, Object> row = new HashMap<>();
-            row.put("process", entry.getKey());
-            row.putAll(entry.getValue());
+            row.put("process", entry.getKey()); // used as axis
+
+            for (PlantType plant : PlantType.values()) {
+                String plantName = plant.name();
+                row.put(plantName, entry.getValue().getOrDefault(plantName, 0L));
+            }
+
             result.add(row);
         }
 
         return ResponseEntity.ok(result);
     }
+
+
 
     @GetMapping("/line")
     public ResponseEntity<List<Map<String, Object>>> getProcessTrends() {

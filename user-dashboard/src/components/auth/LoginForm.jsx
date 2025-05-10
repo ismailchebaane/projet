@@ -27,7 +27,8 @@ const LoginPage = () => {
 
       setError(false);
       alert("Login successful!");
-      navigate(-1); // Redirect to the dashboard
+      navigate(-1);
+      window.location.href ="" // Redirect to the dashboard
     } catch (err) {
       console.error("Login failed:", err);
       setError(true);

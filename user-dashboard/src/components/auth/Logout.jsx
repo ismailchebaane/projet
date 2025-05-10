@@ -1,8 +1,9 @@
-const handleLogout = () => {
+// ✅ CORRECT for default export
+const Logout = () => {
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
+  window.location.href = "/";
+  return null;
+};
 
-
-    localStorage.removeItem("token"); // If using sessionStorage, use sessionStorage.removeItem()
-    sessionStorage.removeItem("token"); 
-    window.location.href = "/login"; // Redirect to login page
-  };
-  
+export default Logout;

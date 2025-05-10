@@ -23,6 +23,8 @@ public class UserController {
     public UserController(UserServices userServices) {
         this.userServices = userServices;
     }
+
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/api/user")
     public List<User> getUsers() {

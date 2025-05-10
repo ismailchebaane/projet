@@ -71,13 +71,13 @@ const SecondPage = () => {
                 className="bg-blue-900 text-white py-2 px-6 rounded-lg text-lg w-full hover:bg-blue-700 transition"
                 onClick={() => navigate(`/read-only/${id}`)}
               >
-                Read-only
+                View Documents
               </button>
               <button
                 className="bg-blue-900 text-white py-2 px-6 rounded-lg text-lg w-full hover:bg-blue-700 transition"
                 onClick={() => navigate(`/read-write/${id}`)}
               >
-                Read/Write
+                Sign Documents 
               </button>
             </div>
 

@@ -3,7 +3,7 @@ import axios from "axios";
 import {
   PieChart, Pie, Cell, Tooltip,
   BarChart, Bar, XAxis, YAxis, Legend,
-  LineChart, Line, ResponsiveContainer,
+  LineChart, Line, ResponsiveContainer,LabelList,
 } from "recharts";
 import { FaCogs, FaFileAlt, FaCheckCircle, FaClock } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im"; // Spinner icon
@@ -128,7 +128,7 @@ const token=localStorage.getItem("token")
 
       {/* Pie + Line */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        <ChartCard title="Equipment by Type">
+        <ChartCard title="Equipment by Process">
           <ResponsiveContainer>
             <PieChart>
               <Pie
@@ -151,7 +151,7 @@ const token=localStorage.getItem("token")
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Plants and Process">
+        <ChartCard title="Process Count">
           <ResponsiveContainer>
             <LineChart data={lineData}>
               <XAxis dataKey="process" style={{ fontSize: '10px' }} />
@@ -165,21 +165,50 @@ const token=localStorage.getItem("token")
 
       {/* Bar + Donut + Activity */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <ChartCard title="Equipment Count by Process and Plant" className="xl:col-span-2">
-          <ResponsiveContainer>
-            <BarChart data={barData}>
-              <XAxis dataKey="process" style={{ fontSize: '10px' }} />
-              <YAxis style={{ fontSize: '10px' }} />
-              <Tooltip />
-              <Legend verticalAlign="top" height={36} />
-              {Object.keys(barData[0] || {})
-                .filter((key) => key !== "process")
-                .map((plant, idx) => (
-                  <Bar key={plant} dataKey={plant} stackId="a" fill={COLORS[idx % COLORS.length]} />
-                ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
+
+
+
+      <ChartCard title="Equipment Count by Process and Plant" className="xl:col-span-2">
+  <ResponsiveContainer>
+    <BarChart data={barData}>
+      <XAxis dataKey="plant" style={{ fontSize: '10px' }} />
+      <YAxis style={{ fontSize: '10px' }} />
+      <Tooltip />
+      <Legend verticalAlign="top" height={36} />
+      
+      {/* Loop over process types */}
+      {Object.keys(barData[0] || {})
+        .filter((key) => key !== "plant")
+        .map((process, idx) => {
+          // Filter out entries with 0 value for this process
+          const filteredData = barData.filter((entry) => entry[process] > 0);
+
+          if (filteredData.length > 0) {
+            return (
+              <Bar
+                key={process}
+                dataKey={process}
+                fill={COLORS[idx % COLORS.length]}
+                name={process}
+                stackId="a"
+              >
+                {/* Adding Process Name Labels on Bars */}
+                <LabelList
+                  dataKey="process" // Process Name Key
+                  position="top" // Position the label on top of the bars
+                  style={{ fontSize: '10px', fill: '#000' }} // Styling the labels
+                />
+              </Bar>
+            );
+          }
+
+          return null; // Return null if no data for this process
+        })}
+    </BarChart>
+  </ResponsiveContainer>
+</ChartCard>
+
+
 
         <ChartCard title="Machines in Good Condition">
           <ResponsiveContainer>
